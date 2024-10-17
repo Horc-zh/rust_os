@@ -11,6 +11,7 @@ extern crate uart_16550;
 extern crate volatile;
 extern crate x86_64;
 
+pub mod gdt;
 pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
@@ -34,6 +35,7 @@ where
 }
 
 pub fn init() {
+    gdt::init();
     interrupts::init_idt();
 }
 
