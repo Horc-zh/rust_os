@@ -3,6 +3,7 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![feature(abi_x86_interrupt)]
 
 extern crate lazy_static;
 extern crate spin;
@@ -10,13 +11,15 @@ extern crate uart_16550;
 extern crate volatile;
 extern crate x86_64;
 
+pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
 
 use core::panic::PanicInfo;
 
 pub trait Testable {
-    fn run(&self) -> ();
+    //origin : fn run(&self) -> ();
+    fn run(&self);
 }
 
 impl<T> Testable for T
@@ -28,6 +31,10 @@ where
         self();
         serial_println!("[ok]");
     }
+}
+
+pub fn init() {
+    interrupts::init_idt();
 }
 
 pub fn test_runner(tests: &[&dyn Testable]) {
@@ -49,6 +56,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
     loop {}
 }
